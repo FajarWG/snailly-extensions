@@ -30,18 +30,6 @@ export const promptModel = async (textSnippet) => {
   let fullResponse = "";
 
   try {
-    // if (!session) {
-    //   await updateSession();
-    //   updateStats();
-    // }
-
-    // Kirim permintaan dengan streaming
-    // const stream = await session.promptStreaming(promptTemplate);
-
-    // for await (const chunk of stream) {
-    //   fullResponse = chunk.trim(); // Simpan jawaban terakhir dari stream
-    // }
-
     const { available, defaultTemperature, defaultTopK, maxTopK } =
       await ai.languageModel.capabilities();
 
@@ -57,16 +45,7 @@ export const promptModel = async (textSnippet) => {
       }
     }
 
-    console.log("Response from AI Model:", fullResponse);
-
-    // Validasi jawaban fullResponse lowercase
-    if (fullResponse.toLowerCase() === "negative") {
-      const redirectionUrl = "https://snailly-block.netlify.app/";
-      chrome.tabs.update(sender.tab.id, { url: redirectionUrl });
-      console.log(`Prediction: Negative. Redirected to ${redirectionUrl}`);
-    } else {
-      console.log("Prediction: Positive. No redirection.");
-    }
+    return fullResponse;
   } catch (error) {
     console.error("Error during AI processing:", error.message);
   }

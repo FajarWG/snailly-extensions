@@ -17,28 +17,10 @@ const Home = () => {
     token: "",
   });
 
-  const [listOfSummary, setListOfSummary] = useState();
-
-  const [isLoading, setIsLoading] = useState(true);
-
-  const getListSummary = async (token) => {
-    setIsLoading(true);
-    try {
-      const dataSummary = await fetcher(`/log/summary/ALL}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      console.log(dataSummary.data);
-      const summary = dataSummary.data;
-      setListOfSummary(summary);
-      setIsLoading(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const [listOfSummary, setListOfSummary] = useState({
+    totalSafeWebsites: 0,
+    totalDangerousWebsites: 0,
+  });
 
   const onLogout = () => {
     chrome.storage.local.remove(["token"], () => {
@@ -53,12 +35,29 @@ const Home = () => {
   useEffect(() => {
     chrome.storage.local.get(["token"], (result) => {
       console.log(result);
-      getListSummary(result.token);
 
       if (!result.token) {
         navigate("/login");
       }
       setData((prev) => ({ ...prev, token: result.token }));
+    });
+
+    chrome.storage.local.get(["totalDangerousWebsites"], (result) => {
+      if (result.totalDangerousWebsites) {
+        setListOfSummary((prev) => ({
+          ...prev,
+          totalDangerousWebsites: result.totalDangerousWebsites,
+        }));
+      }
+    });
+
+    chrome.storage.local.get(["totalSafeWebsites"], (result) => {
+      if (result.totalSafeWebsites) {
+        setListOfSummary((prev) => ({
+          ...prev,
+          totalSafeWebsites: result.totalSafeWebsites,
+        }));
+      }
     });
 
     chrome.storage.local.get(["user"], (result) => {
@@ -80,57 +79,53 @@ const Home = () => {
         </p>
       </div>
 
-      {isLoading ? (
-        <div>Loading...</div>
-      ) : (
-        <div className="flex flex-row gap-2">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Accessed Content
-                  </p>
-                  <p className="text-3xl font-bold text-[#8BA446]">
-                    {listOfSummary.totalDangerousWebsites +
-                      listOfSummary.totalSafeWebsites}
-                  </p>
-                </div>
+      <div className="flex flex-row gap-2">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Accessed Content
+                </p>
+                <p className="text-3xl font-bold text-[#8BA446]">
+                  {listOfSummary.totalDangerousWebsites +
+                    listOfSummary.totalSafeWebsites}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Positive Content
-                  </p>
-                  <p className="text-3xl font-bold text-[#0066FF]">
-                    {listOfSummary.totalSafeWebsites}
-                  </p>
-                </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Positive Content
+                </p>
+                <p className="text-3xl font-bold text-[#0066FF]">
+                  {listOfSummary.totalSafeWebsites}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Negative Content
-                  </p>
-                  <p className="text-3xl font-bold text-[#FF4444]">
-                    {listOfSummary.totalDangerousWebsites}
-                  </p>
-                </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Negative Content
+                </p>
+                <p className="text-3xl font-bold text-[#FF4444]">
+                  {listOfSummary.totalDangerousWebsites}
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="mt-12 flex justify-center items-center flex-col gap-4 ">
         <Button

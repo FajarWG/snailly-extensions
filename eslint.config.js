@@ -36,6 +36,7 @@ export default [
     },
     env: {
       chrome: true,
+      node: true,
     },
   },
 ];

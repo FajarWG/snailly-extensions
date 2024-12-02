@@ -33,9 +33,14 @@ function checkLoginStatus() {
     chrome.tabs.onActivated.addListener((activeInfo) => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const currentTab = tabs[0];
+
         console.log("Current Tab URL:", currentTab.url);
 
-        handleUrlCheck(currentTab);
+        if (currentTab.url.includes("snailly-block.netlify.app")) {
+          return;
+        } else {
+          handleUrlCheck(currentTab);
+        }
       });
     });
 
@@ -44,9 +49,14 @@ function checkLoginStatus() {
       if (changeInfo.status === "complete") {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           const currentTab = tabs[0];
+          console.log("Current Tab:", tabs);
           console.log("Current Tab URL:", currentTab.url);
 
-          handleUrlCheck(currentTab);
+          if (currentTab.url.includes("snailly-block.netlify.app")) {
+            return;
+          } else {
+            handleUrlCheck(currentTab);
+          }
         });
       }
     });
@@ -59,17 +69,17 @@ function checkLoginStatus() {
 
           const textSnippet = message.text.split(" ").slice(0, 100).join(" ");
 
-          try {
-            // Step 4: Predict Dangerous Status with Extracted Text
+          console.log("Text Snippet:", textSnippet);
 
+          try {
             const response = await promptModel(textSnippet);
 
-            if (!response.ok) {
-              throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            console.log("Response from AI Model:", response);
 
-            if (response === "negative") {
-              const redirectionUrl = "https://snailly-block.netlify.app/";
+            const redirectionUrl = "https://snailly-block.netlify.app/";
+
+            if (response.toLowerCase() === "negative") {
+              updateDangerousWebsites();
 
               chrome.tabs.update(sender.tab.id, { url: redirectionUrl });
               console.log(
@@ -78,11 +88,8 @@ function checkLoginStatus() {
             } else {
               console.log("Prediction: Safe.");
             }
-
-            sendResponse({ success: true, prediction });
           } catch (error) {
             console.error("Error during prediction:", error.message);
-            sendResponse({ success: false, error: error.message });
           }
 
           // Keep connection open for async response
@@ -93,31 +100,31 @@ function checkLoginStatus() {
   });
 }
 
-const insertHistory = async (url) => {
-  chrome.storage.local.get(["user"], async (result) => {
-    console.log("User Data:", url);
-    const logData = {
-      childId: result.user.id,
-      parentId: result.user.parentsId,
-      url: url,
-      web_title: url.split("//")[1].split("/")[0].split(".")[1],
-      web_description: "",
-      detail_url: "",
-    };
-    try {
-      const response = await fetch(BASE_URL + "/log", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(logData),
-      });
-    } catch (error) {
-      console.error("Error inserting history:", error.message);
-    }
-  });
-};
+// const insertHistory = async (url) => {
+//   chrome.storage.local.get(["user"], async (result) => {
+//     console.log("User Data:", url);
+//     const logData = {
+//       childId: result.user.id,
+//       parentId: result.user.parentsId,
+//       url: url,
+//       web_title: url.split("//")[1].split("/")[0].split(".")[1],
+//       web_description: "",
+//       detail_url: "",
+//     };
+//     try {
+//       const response = await fetch(BASE_URL + "/log", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${token}`,
+//         },
+//         body: JSON.stringify(logData),
+//       });
+//     } catch (error) {
+//       console.error("Error inserting history:", error.message);
+//     }
+//   });
+// };
 
 const handleUrlCheck = async (currentTab) => {
   const redirectionUrl = "https://snailly-block.netlify.app/";
@@ -165,11 +172,15 @@ const handleUrlCheck = async (currentTab) => {
     console.log("Check Link:", dangerousList.includes(currentDomain));
 
     if (dangerousList.includes(currentDomain)) {
-      const sendHistory = await insertHistory(currentTab.url);
+      // const sendHistory = await insertHistory(currentTab.url);
+      updateDangerousWebsites();
+
       chrome.tabs.update(currentTab.id, { url: redirectionUrl });
+
       console.log(`Redirected from ${currentTab.url} to ${redirectionUrl}`);
       console.log("Send History:", sendHistory);
     } else {
+      updateSafeWebsites();
       console.log(
         `URL not in dangerous list. Extracting text from: ${currentTab.url}`
       );
@@ -188,3 +199,25 @@ const injectContentScript = (tabId) => {
     files: ["content.js"],
   });
 };
+
+// Fungsi untuk memperbarui jumlah website berbahaya
+function updateDangerousWebsites() {
+  chrome.storage.local.get(["totalDangerousWebsites"], (result) => {
+    // Jika belum ada, set ke 0, jika ada tambah 1
+    let newCount = (result.totalDangerousWebsites || 0) + 1;
+    chrome.storage.local.set({ totalDangerousWebsites: newCount }, () => {
+      console.log("Total Dangerous Websites updated to: " + newCount);
+    });
+  });
+}
+
+// Fungsi untuk memperbarui jumlah website aman
+function updateSafeWebsites() {
+  chrome.storage.local.get(["totalSafeWebsites"], (result) => {
+    // Jika belum ada, set ke 0, jika ada tambah 1
+    let newCount = (result.totalSafeWebsites || 0) + 1;
+    chrome.storage.local.set({ totalSafeWebsites: newCount }, () => {
+      console.log("Total Safe Websites updated to: " + newCount);
+    });
+  });
+}

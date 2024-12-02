@@ -19,6 +19,13 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSubmit(); //
+    }
+  };
+
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -70,6 +77,10 @@ const Login = () => {
         console.log("User saved successfully!");
       });
 
+      chrome.storage.local.set({ password: form.password }, () => {
+        console.log("Password saved successfully!");
+      });
+
       navigate("/");
     } catch (error) {
       setError(true);
@@ -92,7 +103,7 @@ const Login = () => {
       <div className="mt-12">
         <h1 className="font-bold text-2xl">Login Account Snailly</h1>
       </div>
-      <div className="flex gap-3 flex-col mt-5 justify-center items-center">
+      <div className="flex gap-3 text-start flex-col mt-5 justify-center items-center">
         <div className="grid w-full max-w-sm items-center text-start gap-1.5">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -133,6 +144,7 @@ const Login = () => {
           disabled={isLoading || !form.email || !form.password}
           className="w-[380px] h-12"
           onClick={handleSubmit}
+          onKeyDown={handleKeyDown}
         >
           Login
         </Button>

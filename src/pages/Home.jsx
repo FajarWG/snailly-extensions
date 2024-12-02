@@ -3,8 +3,18 @@ import { LogoSnaily } from "@/assets";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { fetcher, fetcherWithToken } from "@/lib/fetch";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useSnackbar } from "notistack";
+import { Input } from "@/components/ui/input";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -17,19 +27,27 @@ const Home = () => {
     token: "",
   });
 
+  const [password, setPassword] = useState("");
+
   const [listOfSummary, setListOfSummary] = useState({
     totalSafeWebsites: 0,
     totalDangerousWebsites: 0,
   });
 
   const onLogout = () => {
-    chrome.storage.local.remove(["token"], () => {
-      enqueueSnackbar("Logout successfully", { variant: "success" });
+    chrome.storage.local.get(["password"], (result) => {
+      if (result.password === password) {
+        chrome.storage.local.remove(["token"], () => {
+          enqueueSnackbar("Logout successfully", { variant: "success" });
+        });
+        chrome.storage.local.remove(["user"], () => {
+          enqueueSnackbar("Logout successfully", { variant: "success" });
+        });
+        navigate("/login");
+      } else {
+        enqueueSnackbar("Password is incorrect", { variant: "error" });
+      }
     });
-    chrome.storage.local.remove(["user"], () => {
-      enqueueSnackbar("Logout successfully", { variant: "success" });
-    });
-    navigate("/login");
   };
 
   useEffect(() => {
@@ -127,15 +145,39 @@ const Home = () => {
         </Card>
       </div>
 
-      <div className="mt-12 flex justify-center items-center flex-col gap-4 ">
-        <Button
-          onClick={() => onLogout()}
-          className="w-[400px] h-12"
-          variant="destructive"
-        >
-          Logout
-        </Button>
-      </div>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button
+            className="w-[400px] h-12 mt-12 flex justify-center items-center flex-col gap-4"
+            variant="destructive"
+          >
+            Logout
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-black">
+              Are you sure you want to logout from Snaily?
+            </DialogTitle>
+            <DialogDescription className="flex flex-col gap-4 mt-2">
+              <Input
+                placeholder="Enter your password"
+                type="password"
+                className="w-[300px]"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <Button
+                onClick={() => onLogout()}
+                className="w-[300px] h-12"
+                variant="destructive"
+              >
+                Logout
+              </Button>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

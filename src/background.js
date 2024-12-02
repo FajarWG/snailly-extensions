@@ -70,6 +70,7 @@ function checkLoginStatus() {
 
             if (response === "negative") {
               const redirectionUrl = "https://snailly-block.netlify.app/";
+
               chrome.tabs.update(sender.tab.id, { url: redirectionUrl });
               console.log(
                 `Prediction: Dangerous. Redirected to ${redirectionUrl}`

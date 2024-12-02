@@ -30,47 +30,44 @@ export const promptModel = async (textSnippet) => {
   let fullResponse = "";
 
   try {
-    if (!session) {
-      await updateSession();
-      updateStats();
-    }
+    // if (!session) {
+    //   await updateSession();
+    //   updateStats();
+    // }
 
     // Kirim permintaan dengan streaming
-    const stream = await session.promptStreaming(promptTemplate);
+    // const stream = await session.promptStreaming(promptTemplate);
 
-    for await (const chunk of stream) {
-      fullResponse = chunk.trim(); // Simpan jawaban terakhir dari stream
+    // for await (const chunk of stream) {
+    //   fullResponse = chunk.trim(); // Simpan jawaban terakhir dari stream
+    // }
+
+    const { available, defaultTemperature, defaultTopK, maxTopK } =
+      await ai.languageModel.capabilities();
+
+    let fullResponse;
+    if (available !== "no") {
+      const session = await ai.languageModel.create();
+
+      fullResponse = await session.prompt(promptTemplate);
+
+      if (session) {
+        session.destroy();
+        console.log("Session destroyed.");
+      }
     }
 
     console.log("Response from AI Model:", fullResponse);
 
-    // Validasi jawaban
-    if (fullResponse === "negative") {
-      const redirectionUrl = "https://www.vitejs.dev/";
+    // Validasi jawaban fullResponse lowercase
+    if (fullResponse.toLowerCase() === "negative") {
+      const redirectionUrl = "https://snailly-block.netlify.app/";
       chrome.tabs.update(sender.tab.id, { url: redirectionUrl });
       console.log(`Prediction: Negative. Redirected to ${redirectionUrl}`);
-    } else if (fullResponse === "positive") {
-      console.log("Prediction: Positive. No redirection.");
     } else {
-      console.error("Invalid response from AI Model:", fullResponse);
+      console.log("Prediction: Positive. No redirection.");
     }
   } catch (error) {
     console.error("Error during AI processing:", error.message);
-  } finally {
-    // Hancurkan sesi setelah selesai
-    if (session) {
-      session.destroy();
-      console.log("Session destroyed.");
-    }
-    updateStats();
   }
-};
-
-const updateSession = async () => {
-  session = await self.ai.languageModel.create({
-    temperature: 0.7, // Atur sesuai kebutuhan Anda
-    topK: 40, // Atur sesuai kebutuhan Anda
-  });
-  resetUI();
-  updateStats();
 };

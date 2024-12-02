@@ -17,6 +17,7 @@ const Login = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     setForm({
@@ -50,24 +51,34 @@ const Login = () => {
         console.log("Token Bearer saved successfully!");
       });
 
-      const responseChildrenList = await fetcherWithToken("/child", {
+      const responseChildrenList = await fetcher("/child", {
         method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.accessToken}`,
+        },
       });
 
       const childrenList = await responseChildrenList.data;
 
+      const children = Array.isArray(childrenList)
+        ? childrenList[0]
+        : childrenList;
+
       enqueueSnackbar(responseLogin.message, { variant: "success" });
 
-      chrome.storage.local.set({ user: user }, () => {
+      chrome.storage.local.set({ user: children }, () => {
         console.log("User saved successfully!");
       });
-      chrome.storage.local.set({ childrenList: childrenList }, () => {
-        console.log("Children List saved successfully!");
-      });
+
       navigate("/");
     } catch (error) {
-      console.error(error);
-      displayErrorMessage(error, enqueueSnackbar);
+      setError(true);
+      enqueueSnackbar(
+        "Your email or password is incorrect. Please try again.",
+        {
+          variant: "error",
+        }
+      );
     } finally {
       setIsLoading(false);
     }
@@ -78,11 +89,9 @@ const Login = () => {
       <div className="w-full m-auto flex justify-center">
         <LogoSnaily className="w-24 h-24 m-auto" />
       </div>
-
       <div className="mt-12">
         <h1 className="font-bold text-2xl">Login Account Snailly</h1>
       </div>
-
       <div className="flex gap-3 flex-col mt-5 justify-center items-center">
         <div className="grid w-full max-w-sm items-center text-start gap-1.5">
           <Label htmlFor="email">Email</Label>
@@ -119,7 +128,6 @@ const Login = () => {
           </span>
         </p>
       </div>
-
       <div className="mt-7 flex justify-center items-center flex-col gap-4 ">
         <Button
           disabled={isLoading || !form.email || !form.password}
@@ -129,6 +137,12 @@ const Login = () => {
           Login
         </Button>
       </div>
+
+      {error && (
+        <p className="text-red-400 mt-3 text-sm">
+          Your email or password is incorrect. Please try again.
+        </p>
+      )}
     </div>
   );
 };

@@ -17,8 +17,12 @@ export const fetcher = async (url, options) => {
 };
 
 export const fetcherWithToken = async (url, options) => {
-  const token =
-    "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIxOTA3MTBmLTNhMzYtNDE0Yy1hNjJlLTRhNzkyN2ZlZWZmZCIsImVtYWlsIjoiZGV2QGdtYWlsLmNvbSIsIm5hbWUiOiJkZXZlbG9wbWVudCIsImlhdCI6MTczMzA1MzgyOSwiZXhwIjoxNzMzMTQwMjI5fQ.JmaqTeTi6viFHCqAU-x96A0T4J0hhRgP9nvdvjxK5YhZ0s_TjNBUe9y8U6Ormu5cZRuWa8ZCB2oSHfgb2pvlT7z99HgUzUSowfWHlli3AGc5R5xxpsXg8GHlG-RMo6RuRxElHZHN8RpDBL7t1-MIztAogqHzMQ5FJUB6PelkPoc";
+  // let token =
+  //   "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxNTMzNmQyLWJlNmMtNDcwOS05OGVhLWE3ZjBlOTZhNTAzMiIsImVtYWlsIjoiZmFqYXJ3Z0BnbWFpbC5jb20iLCJuYW1lIjoiRmFqYXJXRyIsImlhdCI6MTczMzA5Nzk0NywiZXhwIjoxNzMzMTg0MzQ3fQ.RdxVbuC8QTSUHKzBU2MMNluWP1z8_seUiWhs_0x3FmCrwN8gM2VWpBHocdK5hMrzdGvlwWtzw9zmaEQOQhY82mwxj67muXPij2xPS9IU-2qZ5P_LSpNuw5ntfu-CeWecLZYVlPc9Zf8v3Mcui_Q734Py9kuaOx7r43rwMKbZMSc";
+  let token;
+  chrome.storage.local.get(["token"], (result) => {
+    token = result.token;
+  });
 
   if (!token) {
     throw new Error("Token not found.");

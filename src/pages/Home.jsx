@@ -34,6 +34,8 @@ const Home = () => {
     totalDangerousWebsites: 0,
   });
 
+  const [lastLink, setLastLink] = useState("");
+
   const onLogout = () => {
     chrome.storage.local.get(["password"], (result) => {
       if (result.password === password) {
@@ -67,6 +69,19 @@ const Home = () => {
     navigate("/whitelist");
   };
 
+  const onAddWhitelist = () => {
+    chrome.storage.local.get({ whitelist: [] }, (result) => {
+      const updatedWhitelist = [...result.whitelist, lastLink];
+      chrome.storage.local.set(
+        { whitelist: [...new Set(updatedWhitelist)] },
+        () => {
+          console.log(`${lastLink} added to whitelist.`);
+          enqueueSnackbar("Added to whitelist", { variant: "success" });
+        }
+      );
+    });
+  };
+
   useEffect(() => {
     chrome.storage.local.get(["token"], (result) => {
       console.log(result);
@@ -98,21 +113,23 @@ const Home = () => {
     chrome.storage.local.get(["user"], (result) => {
       setData((prev) => ({ ...prev, user: result.user }));
     });
+
+    chrome.storage.local.get(["lastLink"], (result) => {
+      setLastLink(result.lastLink);
+    });
   }, []);
 
   return (
     <div className="bg-primary-darkGreen w-full h-full p-11 text-center">
       <div className="w-full m-auto flex justify-center">
-        <LogoSnaily className="w-24 h-24 m-auto" />
+        <LogoSnaily className="w-16 h-16 m-auto" />
       </div>
-
-      <div className="mt-12">
+      <div className="mt-8">
         <h1 className="font-bold text-2xl">Welcome User Snailly✨</h1>
         <p className="text-sm my-2">
           This is total content that you have accessed
         </p>
       </div>
-
       <div className="flex flex-row gap-2">
         <Card>
           <CardContent className="pt-6">
@@ -161,26 +178,41 @@ const Home = () => {
         </Card>
       </div>
 
+      {lastLink && (
+        <div className="mt-6 w-full">
+          <h1 className="font-bold text-sm text-start">
+            Last Link You Visited
+          </h1>
+          <div className="flex flex-row gap-2 w-full justify-between items-center">
+            <p className="text-sm">{lastLink.slice(0, 30)}</p>
+            <Button
+              className="w-[150px] bg-white text-black h-7 rounded-xl flex justify-center items-center flex-col gap-4"
+              onClick={() => onAddWhitelist()}
+            >
+              Add to Whitelist
+            </Button>
+          </div>
+        </div>
+      )}
+
       <Button
-        className="w-[400px] bg-blue-500 h-12 mt-12 flex justify-center items-center flex-col gap-4"
+        className="w-[400px] bg-blue-500 h-12 mt-4 flex justify-center items-center flex-col gap-4"
         onClick={() => onSummarize()}
         id="summarizeButton"
       >
         Summarize This Page
       </Button>
-
       <Button
-        className="w-[400px] bg-white h-12 mt-12 flex justify-center items-center flex-col gap-4"
+        className="w-[400px] bg-white text-black h-12 mt-2 flex justify-center items-center flex-col gap-4"
         onClick={() => onWhitelist()}
         id="summarizeButton"
       >
         Whitelist
       </Button>
-
       <Dialog>
         <DialogTrigger asChild>
           <Button
-            className="w-[400px] h-12 mt-4 flex justify-center items-center flex-col gap-4"
+            className="w-[400px] h-12 mt-2 flex justify-center items-center flex-col gap-4"
             variant="destructive"
           >
             Logout

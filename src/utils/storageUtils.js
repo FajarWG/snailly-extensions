@@ -21,15 +21,31 @@ export const checkLoginStatus = async () => {
   chrome.tabs.onUpdated.addListener(handleTabUpdate);
 };
 
+function checkWhitelist(tabUrl, callback) {
+  chrome.storage.local.get(["whitelist"], (result) => {
+    const whitelist = result.whitelist || [];
+    const isWhitelisted = whitelist.some((whitelistedUrl) =>
+      tabUrl.startsWith(whitelistedUrl)
+    );
+    callback(isWhitelisted);
+  });
+}
+
 const handleTabActivation = (activeInfo) => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const currentTab = tabs[0];
 
     chrome.storage.local.set({ lastLink: currentTab.url });
 
-    if (!currentTab.url.includes("snailly-block.netlify.app")) {
-      injectContentScript(currentTab.id);
-    }
+    checkWhitelist(currentTab.url, (isWhitelisted) => {
+      if (isWhitelisted) {
+        console.log("This site is whitelisted, skipping...");
+        return;
+      }
+      if (!currentTab.url.includes("snailly-block.netlify.app")) {
+        injectContentScript(currentTab.id);
+      }
+    });
   });
 };
 
@@ -40,9 +56,15 @@ const handleTabUpdate = (tabId, changeInfo, tab) => {
 
       chrome.storage.local.set({ lastLink: currentTab.url });
 
-      if (!currentTab.url.includes("snailly-block.netlify.app")) {
-        injectContentScript(currentTab.id);
-      }
+      checkWhitelist(currentTab.url, (isWhitelisted) => {
+        if (isWhitelisted) {
+          console.log("This site is whitelisted, skipping...");
+          return;
+        }
+        if (!currentTab.url.includes("snailly-block.netlify.app")) {
+          injectContentScript(currentTab.id);
+        }
+      });
     });
   }
 };

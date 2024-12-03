@@ -35,7 +35,9 @@ const handleTabActivation = (activeInfo) => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const currentTab = tabs[0];
 
-    chrome.storage.local.set({ lastLink: currentTab.url });
+    if (!currentTab.url.includes("snailly-block.netlify.app")) {
+      chrome.storage.local.set({ lastLink: currentTab.url });
+    }
 
     checkWhitelist(currentTab.url, (isWhitelisted) => {
       if (isWhitelisted) {
@@ -54,7 +56,9 @@ const handleTabUpdate = (tabId, changeInfo, tab) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const currentTab = tabs[0];
 
-      chrome.storage.local.set({ lastLink: currentTab.url });
+      if (!currentTab.url.includes("snailly-block.netlify.app")) {
+        chrome.storage.local.set({ lastLink: currentTab.url });
+      }
 
       checkWhitelist(currentTab.url, (isWhitelisted) => {
         if (isWhitelisted) {

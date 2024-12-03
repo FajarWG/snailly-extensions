@@ -50,6 +50,10 @@ const Home = () => {
     });
   };
 
+  const onSummarize = () => {
+    navigate("/summarize");
+  };
+
   useEffect(() => {
     chrome.storage.local.get(["token"], (result) => {
       console.log(result);
@@ -145,10 +149,18 @@ const Home = () => {
         </Card>
       </div>
 
+      <Button
+        className="w-[400px] bg-blue-500 h-12 mt-12 flex justify-center items-center flex-col gap-4"
+        onClick={() => onSummarize()}
+        id="summarizeButton"
+      >
+        Summarize This Page
+      </Button>
+
       <Dialog>
         <DialogTrigger asChild>
           <Button
-            className="w-[400px] h-12 mt-12 flex justify-center items-center flex-col gap-4"
+            className="w-[400px] h-12 mt-4 flex justify-center items-center flex-col gap-4"
             variant="destructive"
           >
             Logout

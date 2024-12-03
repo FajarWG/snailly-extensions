@@ -1,6 +1,15 @@
-export const promptModel = async (textSnippet) => {
-  if (!self.ai || !self.ai.languageModel) {
-    return;
+export const promptModel = async (content) => {
+  const { available } = await ai.languageModel.capabilities();
+
+  if (available === "no") {
+    console.log("AI model not available.");
+    await ai.languageModel.create({
+      monitor(m) {
+        m.addEventListener("downloadprogress", (e) => {
+          console.log(`Downloaded ${e.loaded} of ${e.total} bytes.`);
+        });
+      },
+    });
   }
 
   const promptTemplate = `You are an advanced AI model trained for sentiment and content analysis. Your task is to classify the overall sentiment and type of content on a website as either "Positive" or "Negative" based on the following criteria:
@@ -25,13 +34,10 @@ export const promptModel = async (textSnippet) => {
   Response Format:
   Your response must be one word only: Positive or Negative.
   Input:
-  "${textSnippet}"`;
-
-  let fullResponse = "";
+  "${content}"`;
 
   try {
-    const { available, defaultTemperature, defaultTopK, maxTopK } =
-      await ai.languageModel.capabilities();
+    const { available } = await ai.languageModel.capabilities();
 
     let fullResponse;
     if (available !== "no") {

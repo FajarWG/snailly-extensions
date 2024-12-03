@@ -12,6 +12,7 @@ export default defineConfig({
         main: "./index.html",
         background: "./src/background.js",
         content: "./src/content.js",
+        summarizeContent: "./src/summarizeContent.js",
       },
       output: {
         // Output penamaan file untuk background.js

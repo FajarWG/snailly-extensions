@@ -52,8 +52,6 @@ const Login = () => {
 
       const user = await responseLogin.data;
 
-      console.log(user);
-
       chrome.storage.local.set({ token: user.accessToken }, () => {
         console.log("Token Bearer saved successfully!");
       });

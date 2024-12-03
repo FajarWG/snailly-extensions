@@ -4,3 +4,10 @@ export const injectContentScript = (tabId) => {
     files: ["content.js"],
   });
 };
+
+export const injectSummarizeScript = (tabId) => {
+  chrome.scripting.executeScript({
+    target: { tabId },
+    files: ["summarizeContent.js"],
+  });
+};

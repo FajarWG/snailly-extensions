@@ -1,4 +1,4 @@
-import { injectContentScript } from "./tabUtils";
+import { injectContentScript, injectSummarizeScript } from "./tabUtils";
 
 export const getToken = () =>
   new Promise((resolve) => {

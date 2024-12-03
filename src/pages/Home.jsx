@@ -51,6 +51,15 @@ const Home = () => {
   };
 
   const onSummarize = () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const currentTab = tabs[0].id;
+
+      console.log("Current Tab ID:", currentTab);
+      chrome.scripting.executeScript({
+        target: { tabId: currentTab },
+        files: ["summarizeContent.js"],
+      });
+    });
     navigate("/summarize");
   };
 
@@ -83,7 +92,6 @@ const Home = () => {
     });
 
     chrome.storage.local.get(["user"], (result) => {
-      console.log(result);
       setData((prev) => ({ ...prev, user: result.user }));
     });
   }, []);

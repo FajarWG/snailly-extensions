@@ -1,4 +1,5 @@
-import { promptModel } from "./prompt";
+import { promptModel } from "./utils/prompt";
+import { summarizeModel } from "./utils/summarize";
 
 import {
   updateDangerousWebsites,
@@ -42,6 +43,17 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       console.error("Error during prediction:", error.message);
     }
 
+    return true;
+  } else if (message.type === "summarize") {
+    try {
+      const summary = await summarizeModel(message.content);
+      chrome.storage.local.set({ lastSummary: summary }, () => {
+        sendResponse({ success: true });
+      });
+    } catch (error) {
+      console.error("Summarization error:", error.message);
+      sendResponse({ success: false, error: error.message });
+    }
     return true;
   }
 });

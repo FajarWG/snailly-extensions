@@ -10,17 +10,24 @@ const Summarize = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
-  const [data, setData] = useState("Nothing to summarize yet.");
-
+  const [data, setData] = useState("Please Wait...");
   const onCopyText = () => {
     navigator.clipboard.writeText(data);
     enqueueSnackbar("Copied to clipboard", { variant: "success" });
   };
 
   useEffect(() => {
-    chrome.storage.local.get(["lastSummary"], (result) => {
-      setData(result.lastSummary || "Nothing to summarize yet.");
-    });
+    const intervalId = setInterval(() => {
+      chrome.storage.local.get(["lastSummary"], (result) => {
+        setData(result.lastSummary || "In progress...");
+      });
+
+      console.log("update summarize");
+    }, 3000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   return (

@@ -6,6 +6,15 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const Whitelist = () => {
   const navigate = useNavigate();
@@ -13,6 +22,7 @@ const Whitelist = () => {
 
   const [data, setData] = useState([]);
   const [newUrl, setNewUrl] = useState("");
+  const [password, setPassword] = useState("");
 
   function removeFromWhitelist(index) {
     chrome.storage.local.get(["whitelist"], (result) => {
@@ -35,17 +45,24 @@ const Whitelist = () => {
   }
 
   const onAddWhitelist = () => {
-    chrome.storage.local.get({ whitelist: [] }, (result) => {
-      const updatedWhitelist = [...result.whitelist, newUrl];
-      chrome.storage.local.set(
-        { whitelist: [...new Set(updatedWhitelist)] },
-        () => {
-          console.log(`${newUrl} added to whitelist.`);
-          enqueueSnackbar("Website added to whitelist", { variant: "success" });
-          renderWhitelist();
-          setNewUrl("");
-        }
-      );
+    chrome.storage.local.get(["password"], (result) => {
+      if (result.password === password) {
+        chrome.storage.local.get({ whitelist: [] }, (result) => {
+          const updatedWhitelist = [...result.whitelist, newUrl];
+          chrome.storage.local.set(
+            { whitelist: [...new Set(updatedWhitelist)] },
+            () => {
+              console.log(`${newUrl} added to whitelist.`);
+              renderWhitelist();
+              setNewUrl("");
+            }
+          );
+        });
+        enqueueSnackbar("Added to whitelist", { variant: "success" });
+        setPassword("");
+      } else {
+        enqueueSnackbar("Password is incorrect", { variant: "error" });
+      }
     });
   };
   const renderWhitelist = () => {
@@ -80,12 +97,35 @@ const Whitelist = () => {
             value={newUrl}
             onChange={(e) => setNewUrl(e.target.value)}
           />
-          <Button
-            onClick={() => onAddWhitelist()}
-            className="w-[300px] h-9 rounded-lg"
-          >
-            Add
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="w-[300px] h-9 rounded-lg">Add</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="text-black">
+                  Add {newUrl} to Whitelist.
+                </DialogTitle>
+                <DialogDescription className="flex flex-col gap-4 mt-2">
+                  <Input
+                    placeholder="Enter your password"
+                    type="password"
+                    className="w-[300px]"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <DialogClose asChild>
+                    <Button
+                      className="w-[300px] h-12"
+                      onClick={() => onAddWhitelist()}
+                    >
+                      Add to Whitelist
+                    </Button>
+                  </DialogClose>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <ScrollArea className="h-[200px] rounded-md border p-4  mt-4">

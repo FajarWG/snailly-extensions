@@ -8,7 +8,6 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -70,15 +69,23 @@ const Home = () => {
   };
 
   const onAddWhitelist = () => {
-    chrome.storage.local.get({ whitelist: [] }, (result) => {
-      const updatedWhitelist = [...result.whitelist, lastLink];
-      chrome.storage.local.set(
-        { whitelist: [...new Set(updatedWhitelist)] },
-        () => {
-          console.log(`${lastLink} added to whitelist.`);
-          enqueueSnackbar("Added to whitelist", { variant: "success" });
-        }
-      );
+    chrome.storage.local.get(["password"], (result) => {
+      if (result.password === password) {
+        chrome.storage.local.get({ whitelist: [] }, (result) => {
+          const updatedWhitelist = [...result.whitelist, lastLink];
+          chrome.storage.local.set(
+            { whitelist: [...new Set(updatedWhitelist)] },
+            () => {
+              console.log(`${lastLink} added to whitelist.`);
+              enqueueSnackbar("Added to whitelist", { variant: "success" });
+            }
+          );
+        });
+        enqueueSnackbar("Added to whitelist", { variant: "success" });
+        setPassword("");
+      } else {
+        enqueueSnackbar("Password is incorrect", { variant: "error" });
+      }
     });
   };
 
@@ -185,12 +192,38 @@ const Home = () => {
           </h1>
           <div className="flex flex-row gap-2 w-full justify-between items-center">
             <p className="text-sm">{lastLink.slice(0, 30)}</p>
-            <Button
-              className="w-[150px] bg-white text-black h-7 rounded-xl flex justify-center items-center flex-col gap-4"
-              onClick={() => onAddWhitelist()}
-            >
-              Add to Whitelist
-            </Button>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="w-[150px] bg-white text-black h-7 rounded-xl flex justify-center items-center flex-col gap-4">
+                  Add to Whitelist
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="text-black">
+                    Add {lastLink.slice(0, 30)} to Whitelist.
+                  </DialogTitle>
+                  <DialogDescription className="flex flex-col gap-4 mt-2">
+                    <Input
+                      placeholder="Enter your password"
+                      type="password"
+                      className="w-[300px]"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <DialogClose asChild>
+                      <Button
+                        className="w-[300px] h-12"
+                        onClick={() => onAddWhitelist()}
+                      >
+                        Add to Whitelist
+                      </Button>
+                    </DialogClose>
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       )}

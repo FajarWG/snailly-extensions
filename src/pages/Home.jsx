@@ -63,6 +63,10 @@ const Home = () => {
     navigate("/summarize");
   };
 
+  const onWhitelist = () => {
+    navigate("/whitelist");
+  };
+
   useEffect(() => {
     chrome.storage.local.get(["token"], (result) => {
       console.log(result);
@@ -163,6 +167,14 @@ const Home = () => {
         id="summarizeButton"
       >
         Summarize This Page
+      </Button>
+
+      <Button
+        className="w-[400px] bg-white h-12 mt-12 flex justify-center items-center flex-col gap-4"
+        onClick={() => onWhitelist()}
+        id="summarizeButton"
+      >
+        Whitelist
       </Button>
 
       <Dialog>

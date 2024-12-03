@@ -31,7 +31,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       const response = await promptModel(textSnippet);
       console.log("Response from AI Model:", response);
 
-      if (response.toLowerCase() === "negative") {
+      if (response.toLowerCase().includes("negative")) {
         updateDangerousWebsites();
         chrome.tabs.update(sender.tab.id, { url: redirectionUrl });
         console.log(`Prediction: Dangerous. Redirected to ${redirectionUrl}`);

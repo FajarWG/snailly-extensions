@@ -1,11 +1,14 @@
-const pageContent = document.body.innerText;
+let pageContent = document.body.innerText;
+pageContent = pageContent.substring(0, 3850);
 chrome.runtime.sendMessage(
   { type: "summarize", content: pageContent },
   (response) => {
     if (response?.success) {
-      alert("Summarization complete! Check the extension popup for results.");
+      console.log(
+        "Summarization complete! Check the extension popup for results."
+      );
     } else {
-      alert("Summarization failed. Please try again.");
+      console.log("Summarization failed. Please try again.");
     }
   }
 );

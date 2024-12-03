@@ -1,1 +1,1 @@
-const t=document.body.innerText;chrome.runtime.sendMessage({type:"summarize",content:t},e=>{e!=null&&e.success?alert("Summarization complete! Check the extension popup for results."):alert("Summarization failed. Please try again.")});
+let t=document.body.innerText;t=t.substring(0,3850);chrome.runtime.sendMessage({type:"summarize",content:t},e=>{e!=null&&e.success?console.log("Summarization complete! Check the extension popup for results."):console.log("Summarization failed. Please try again.")});

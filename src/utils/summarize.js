@@ -31,6 +31,7 @@ export const summarizeModel = async (content) => {
   }
 
   try {
+    summarizer = await ai.summarizer.create();
     const result = await summarizer.summarize(content);
     console.log(result);
 

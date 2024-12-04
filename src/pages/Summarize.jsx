@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useSnackbar } from "notistack";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Summarize = () => {
   const navigate = useNavigate();
@@ -44,8 +45,12 @@ const Summarize = () => {
       </div>
 
       <div className="grid w-full gap-2">
-        <Textarea value={data} />
-        <Button onClick={() => onCopyText()}>Copy Summarize</Button>
+        <ScrollArea className="w-[400px] h-[200px] rounded-md border p-4  mt-4 text-start text-base">
+          {data}
+        </ScrollArea>
+        <Button className="w-[400px] h-8 " onClick={() => onCopyText()}>
+          Copy Summarize
+        </Button>
       </div>
 
       <Button

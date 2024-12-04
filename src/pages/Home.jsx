@@ -8,12 +8,14 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useSnackbar } from "notistack";
 import { Input } from "@/components/ui/input";
+import FirstTimeInstructionsModal from "@/components/FirstTimeInstructionsModal";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -275,6 +277,7 @@ const Home = () => {
           </DialogHeader>
         </DialogContent>
       </Dialog>
+      <FirstTimeInstructionsModal />
     </div>
   );
 };

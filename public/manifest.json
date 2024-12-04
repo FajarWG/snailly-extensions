@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Snailly Project",
-  "description": "Snailly is AI Based solution utilizing Deep Learning and LLM that can provide safe internet for children and help parents monitor and filter content on the internet. ",
+  "name": "Snailly - Safe Browsing for The children",
+  "description": "Snailly is a browser extension that quickly ensures a safer internet for children by blocking harmful website content with Gemini Nano. It also summarizes web pages to understand the content ",
   "version": "1.0.0",
   "action": {
     "default_popup": "index.html"
